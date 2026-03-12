@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 10
+#define UNVISITED 0
+#define VISITING 1
+#define VISITED 2
+
+int adj[MAX][MAX];
+int state[MAX];
+int topo_order[MAX];
+int n, t_idx;
+int has_cycle = 0;
+
+void dfs(int v) {
+    if (has_cycle) return;
+    
+    state[v] = VISITING; // Mark as VISITING
+
+    for (int w = 0; w < n; w++) {
+        if (adj[v][w] == 1) {
+            if (state[w] == VISITING) {
+                has_cycle = 1; // Back edge detected
+                return;
+            }
+            if (state[w] == UNVISITED) {
+                dfs(w);
+            }
+        }
+    }
+
+    state[v] = VISITED; // Mark as VISITED (Dead-end)
+    topo_order[t_idx--] = v; // Insert at the front (filling array backwards)
+}
+
+int main() {
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter adjacency matrix (0/1):\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &adj[i][j]);
+        }
+        state[i] = UNVISITED;
+    }
+
+    t_idx = n - 1; // Start filling from the end to simulate "Insert at Front"
+
+    for (int i = 0; i < n; i++) {
+        if (state[i] == UNVISITED) {
+            dfs(i);
+        }
+    }
+
+    if (has_cycle) {
+        printf("\nError: Graph contains a cycle. Topological sort impossible.\n");
+    } else {
+        printf("\nTopological Sorting Order:\n");
+        for (int i = 0; i < n; i++) {
+            printf("%d ", topo_order[i]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
